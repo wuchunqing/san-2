@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="google-site-verification" content="uz_j2c_UOuyTXyW6W87egnN8gHCyfSqm3kyY_XEx62w" />
+<meta name="theme-color" content="#f5f5f5" />
+<meta name="description" content="Travel distance meter: convert between kilometers, meters, miles, feet, yards, and nautical miles. Real-time results for all units." />
+<title>Travel Distance Meter</title>
+<style>
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html {
+    height: 100%;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    min-height: 100%;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+    line-height: 1.6;
+    padding: 24px 16px;
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+    padding-bottom: max(24px, env(safe-area-inset-bottom));
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 640px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  header {
+    text-align: center;
+    padding: 8px 0 4px;
+  }
+
+  header h1 {
+    font-size: clamp(1.25rem, 4.5vw, 1.625rem);
+    font-weight: 600;
+    color: #222;
+    letter-spacing: -0.3px;
+  }
+
+  header p {
+    margin-top: 6px;
+    font-size: 14px;
+    color: #777;
+  }
+
+  .card {
+    background-color: #fff;
+    border: 1px solid #e5e5e5;
+    border-radius: 10px;
+    padding: 24px;
+  }
+
+  .card h2 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+  }
+
+  .card p, .card li {
+    font-size: 14px;
+    color: #555;
+  }
+
+  .card ul {
+    padding-left: 18px;
+    margin-top: 6px;
+  }
+
+  .card ul li {
+    margin-bottom: 4px;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .form-group.full {
+    grid-column: 1 / -1;
+  }
+
+  label {
+    font-size: 13px;
+    color: #555;
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+
+  input[type="number"],
+  select {
+    width: 100%;
+    padding: 11px 12px;
+    font-size: 15px;
+    border: 1px solid #d9d9d9;
+    border-radius: 6px;
+    background-color: #fff;
+    color: #333;
+    font-family: inherit;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    appearance: none;
+    -webkit-appearance: none;
+    min-height: 44px;
+    touch-action: manipulation;
+  }
+
+  select {
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%23888' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
+    cursor: pointer;
+  }
+
+  input:focus,
+  select:focus {
+    outline: none;
+    border-color: #888;
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.04);
+  }
+
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+
+  .button-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 18px;
+    flex-wrap: wrap;
+  }
+
+  .button-row > button {
+    flex: 1 1 0;
+    min-width: 88px;
+    min-height: 44px;
+    padding: 11px 14px;
+    font-size: 15px;
+    font-weight: 500;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: inherit;
+    border: 1px solid transparent;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+    touch-action: manipulation;
+    user-select: none;
+  }
+
+  button.primary {
+    background-color: #333;
+    color: #fff;
+    border-color: #333;
+  }
+
+  button.primary:hover {
+    background-color: #222;
+  }
+
+  button.secondary {
+    background-color: #fff;
+    color: #444;
+    border-color: #d0d0d0;
+  }
+
+  button.secondary:hover {
+    background-color: #f2f2f2;
+  }
+
+  .result-box {
+    margin-top: 18px;
+    padding: 16px 14px;
+    background-color: #f4f4f4;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    text-align: center;
+  }
+
+  .result-box .result-label {
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .result-box .result-value {
+    font-size: clamp(1.25rem, 5vw, 1.75rem);
+    font-weight: 600;
+    color: #111;
+    font-variant-numeric: tabular-nums;
+    word-break: break-word;
+    line-height: 1.3;
+  }
+
+  .result-box .result-sub {
+    margin-top: 8px;
+    font-size: 13px;
+    color: #666;
+    line-height: 1.4;
+  }
+
+  .all-results {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 4px;
+  }
+
+  .dist-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 14px;
+    background-color: #fafafa;
+    border: 1px solid #eee;
+    border-radius: 6px;
+    font-size: 14px;
+  }
+
+  .dist-row .dist-name {
+    color: #666;
+    font-weight: 500;
+    min-width: 0;
+  }
+
+  .dist-row .dist-value {
+    color: #222;
+    font-weight: 600;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    word-break: break-word;
+    flex-shrink: 0;
+  }
+
+  .dist-row.active-from {
+    border-color: #ccc;
+    background-color: #f0f0f0;
+  }
+
+  .dist-row.active-to {
+    border-color: #bbb;
+    background-color: #ececec;
+  }
+
+  .dist-row.active-from .dist-name::after {
+    content: " (input)";
+    font-size: 11px;
+    color: #999;
+    font-weight: 400;
+  }
+
+  .dist-row.active-to .dist-name::after {
+    content: " (target)";
+    font-size: 11px;
+    color: #999;
+    font-weight: 400;
+  }
+
+  .note {
+    font-size: 12px;
+    color: #999;
+    margin-top: 14px;
+    line-height: 1.5;
+  }
+
+  .unit-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 4px;
+  }
+
+  .unit-item {
+    padding: 12px 14px;
+    background-color: #fafafa;
+    border: 1px solid #eee;
+    border-radius: 6px;
+  }
+
+  .unit-item strong {
+    display: block;
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 4px;
+  }
+
+  .unit-item span {
+    font-size: 13px;
+    color: #666;
+    line-height: 1.45;
+  }
+
+  .site-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+    margin-top: 4px;
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+
+  .ad-slot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 72px;
+    text-align: center;
+    color: #aaa;
+    font-size: 13px;
+    line-height: 1.5;
+    border: 1px dashed #d5d5d5;
+    border-radius: 8px;
+    padding: 28px 16px;
+    background-color: #fafafa;
+  }
+
+  footer.page-copy {
+    display: block;
+    width: 100%;
+    text-align: center;
+    color: #999;
+    font-size: 12px;
+    line-height: 1.5;
+    padding: 4px 0 8px;
+  }
+
+  .toast {
+    position: fixed;
+    bottom: max(28px, env(safe-area-inset-bottom, 28px));
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background-color: #333;
+    color: #fff;
+    padding: 10px 18px;
+    border-radius: 6px;
+    font-size: 13px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    z-index: 1000;
+    max-width: min(90%, 360px);
+    text-align: center;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  @media (max-width: 520px) {
+    body {
+      padding-top: 16px;
+      padding-left: max(12px, env(safe-area-inset-left));
+      padding-right: max(12px, env(safe-area-inset-right));
+    }
+
+    .container { gap: 16px; }
+    .card { padding: 18px; }
+
+    .form-grid {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    input[type="number"],
+    select {
+      font-size: 16px;
+      padding: 12px 14px;
+      min-height: 48px;
+    }
+
+    select {
+      padding-right: 38px;
+      background-position: right 14px center;
+    }
+
+    .button-row > button {
+      min-height: 48px;
+      font-size: 15px;
+      padding: 12px 10px;
+    }
+
+    .dist-row {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+      padding: 12px 14px;
+    }
+
+    .dist-row .dist-value {
+      text-align: left;
+      font-size: 15px;
+      flex-shrink: 1;
+      width: 100%;
+    }
+
+    .dist-row.active-from .dist-name::after,
+    .dist-row.active-to .dist-name::after {
+      display: block;
+      margin-top: 2px;
+    }
+
+    .dist-row.active-from .dist-name::after { content: "(input)"; }
+    .dist-row.active-to .dist-name::after { content: "(target)"; }
+  }
+
+  @media (max-width: 360px) {
+    .button-row { flex-direction: column; }
+    .button-row > button { width: 100%; flex: 1 1 auto; }
+  }
+
+  @media (min-width: 768px) {
+    body { padding-top: 32px; padding-bottom: 40px; }
+    .container { gap: 24px; }
+  }
+</style>
+</head>
+<body>
+  <main class="container">
+    <header>
+      <h1>Travel Distance Meter</h1>
+      <p>Convert travel distances between kilometers, meters, miles, feet, yards, and nautical miles.</p>
+    </header>
+
+    <section class="card">
+      <h2>About This Tool</h2>
+      <p>
+        Whether you are planning a road trip, reading a hiking trail map, or working with marine charts,
+        distances appear in different units around the world. This travel distance meter converts any
+        value using internationally defined length factors, with meters as the internal reference.
+        All six supported units are shown together so you can compare results at a glance.
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>Converter</h2>
+      <div class="form-grid">
+        <div class="form-group full">
+          <label for="distance">Distance Value</label>
+          <input type="number" id="distance" step="any" min="0" inputmode="decimal"
+                 autocomplete="off" placeholder="e.g. 10" aria-describedby="calcHint" />
+        </div>
+        <div class="form-group">
+          <label for="fromUnit">Input Unit</label>
+          <select id="fromUnit" aria-label="Input unit"></select>
+        </div>
+        <div class="form-group">
+          <label for="toUnit">Target Unit</label>
+          <select id="toUnit" aria-label="Target unit"></select>
+        </div>
+      </div>
+
+      <div class="result-box" aria-live="polite" aria-atomic="true">
+        <div class="result-label">Primary Conversion</div>
+        <div class="result-value" id="resPrimary">—</div>
+        <div class="result-sub" id="resSub"></div>
+      </div>
+
+      <div class="button-row">
+        <button type="button" class="primary" id="calcBtn">Convert</button>
+        <button type="button" class="secondary" id="copyBtn">Copy</button>
+        <button type="button" class="secondary" id="clearBtn">Clear</button>
+      </div>
+
+      <p class="note" id="calcHint">
+        Enter any non-negative distance. Exact factors: 1 km = 1000 m, 1 mi = 1609.344 m, 1 ft = 0.3048 m,
+        1 yd = 0.9144 m, 1 nmi = 1852 m.
+      </p>
+    </section>
+
+    <section class="card" aria-labelledby="allResultsHeading">
+      <h2 id="allResultsHeading">All Unit Conversions</h2>
+      <div class="all-results" id="allResults" aria-live="polite"></div>
+    </section>
+
+    <section class="card">
+      <h2>Distance Units Explained</h2>
+      <div class="unit-list">
+        <div class="unit-item">
+          <strong>Kilometer (km)</strong>
+          <span>Metric unit equal to 1,000 meters. Common for road distances and travel planning worldwide.</span>
+        </div>
+        <div class="unit-item">
+          <strong>Meter (m)</strong>
+          <span>SI base unit of length. Used for short distances, athletics tracks, and scientific work.</span>
+        </div>
+        <div class="unit-item">
+          <strong>Mile (mi)</strong>
+          <span>International statute mile = 1,609.344 m. Standard for US and UK road distances.</span>
+        </div>
+        <div class="unit-item">
+          <strong>Foot (ft)</strong>
+          <span>Imperial unit = 0.3048 m exactly. Often used for elevation and smaller measurements.</span>
+        </div>
+        <div class="unit-item">
+          <strong>Yard (yd)</strong>
+          <span>Imperial unit = 3 feet = 0.9144 m. Used in US sports fields and some surveying.</span>
+        </div>
+        <div class="unit-item">
+          <strong>Nautical mile (nmi)</strong>
+          <span>Marine/aviation unit = 1,852 m. One minute of latitude along a meridian.</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>How to Use</h2>
+      <ul>
+        <li>Enter a distance value and choose the <strong>Input Unit</strong>.</li>
+        <li>Select the <strong>Target Unit</strong> for the main conversion shown above.</li>
+        <li>Review <strong>All Unit Conversions</strong> for every supported unit.</li>
+        <li>Use <strong>Copy</strong> to copy the primary conversion and all unit values.</li>
+        <li><strong>Clear</strong> resets to the default example (10 km → mi) and recalculates.</li>
+      </ul>
+    </section>
+
+    <div class="site-footer">
+      <div class="ad-slot" id="adSlot" role="complementary" aria-label="Advertisement">
+        Advertisement
+      </div>
+      <footer class="page-copy">
+        <small>&copy; 2025 travel distance meter</small>
+      </footer>
+    </div>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  var M_PER = {
+    m:   1,
+    km:  1000,
+    mi:  1609.344,
+    ft:  0.3048,
+    yd:  0.9144,
+    nmi: 1852
+  };
+
+  var UNITS = [
+    { id: "km",  name: "Kilometer",     sym: "km" },
+    { id: "m",   name: "Meter",         sym: "m" },
+    { id: "mi",  name: "Mile",          sym: "mi" },
+    { id: "ft",  name: "Foot",          sym: "ft" },
+    { id: "yd",  name: "Yard",          sym: "yd" },
+    { id: "nmi", name: "Nautical mile", sym: "nmi" }
+  ];
+
+  var DEFAULT_VALUE = "10";
+  var DEFAULT_FROM  = "km";
+  var DEFAULT_TO    = "mi";
+
+  var $ = function (id) { return document.getElementById(id); };
+  var distEl     = $("distance");
+  var fromEl     = $("fromUnit");
+  var toEl       = $("toUnit");
+  var resPrimary = $("resPrimary");
+  var resSub     = $("resSub");
+  var allResults = $("allResults");
+  var toast      = $("toast");
+
+  var lastSnapshot = null;
+  var rafId = null;
+  var toastTimer = null;
+  var optionsHtml = "";
+
+  function sym(id) {
+    var i;
+    for (i = 0; i < UNITS.length; i++) {
+      if (UNITS[i].id === id) return UNITS[i].sym;
+    }
+    return id;
+  }
+
+  function toMeters(value, unitId) {
+    return M_PER[unitId] ? value * M_PER[unitId] : NaN;
+  }
+
+  function fromMeters(meters, unitId) {
+    return M_PER[unitId] ? meters / M_PER[unitId] : NaN;
+  }
+
+  function roundTo(value, decimals) {
+    var p = Math.pow(10, decimals);
+    return Math.round(value * p) / p;
+  }
+
+  function decimalsFor(unitId, abs) {
+    if (unitId === "m" || unitId === "ft") {
+      if (abs >= 1000) return 1;
+      if (abs >= 10) return 2;
+      if (abs >= 0.01) return 3;
+      return 6;
+    }
+    if (unitId === "yd") {
+      if (abs >= 1000) return 1;
+      if (abs >= 10) return 2;
+      return 4;
+    }
+    if (abs >= 1000) return 2;
+    if (abs >= 1) return 4;
+    if (abs >= 0.0001) return 6;
+    return 8;
+  }
+
+  function valueWithUnit(unitId, value) {
+    var num;
+    if (!isFinite(value)) return "—";
+    num = roundTo(value, decimalsFor(unitId, Math.abs(value)));
+    return num + " " + sym(unitId);
+  }
+
+  function buildOptionsHtml() {
+    var html = "", i;
+    for (i = 0; i < UNITS.length; i++) {
+      html += '<option value="' + UNITS[i].id + '">' + UNITS[i].name + " (" + UNITS[i].sym + ")</option>";
+    }
+    return html;
+  }
+
+  function populateSelects() {
+    fromEl.innerHTML = optionsHtml;
+    toEl.innerHTML = optionsHtml;
+  }
+
+  function applyDefaults() {
+    fromEl.value = DEFAULT_FROM;
+    toEl.value = DEFAULT_TO;
+    distEl.value = DEFAULT_VALUE;
+  }
+
+  function renderEmptyRows() {
+    var html = "", i;
+    for (i = 0; i < UNITS.length; i++) {
+      html += '<div class="dist-row"><span class="dist-name">' + UNITS[i].name +
+        '</span><span class="dist-value">—</span></div>';
+    }
+    allResults.innerHTML = html;
+  }
+
+  function clearDisplay() {
+    resPrimary.textContent = "—";
+    resSub.textContent = "";
+    renderEmptyRows();
+    lastSnapshot = null;
+  }
+
+  function renderAllRows(meters, fromId, toId, lines) {
+    var frag = document.createDocumentFragment();
+    var i, u, row, nameEl, valEl, cls, line;
+
+    for (i = 0; i < UNITS.length; i++) {
+      u = UNITS[i];
+      cls = "dist-row";
+      if (u.id === fromId) cls += " active-from";
+      if (u.id === toId) cls += " active-to";
+
+      row = document.createElement("div");
+      row.className = cls;
+      nameEl = document.createElement("span");
+      nameEl.className = "dist-name";
+      nameEl.textContent = u.name;
+      valEl = document.createElement("span");
+      valEl.className = "dist-value";
+      line = valueWithUnit(u.id, fromMeters(meters, u.id));
+      valEl.textContent = line;
+      row.appendChild(nameEl);
+      row.appendChild(valEl);
+      frag.appendChild(row);
+
+      if (lines) lines.push(u.name + ": " + line);
+    }
+
+    allResults.innerHTML = "";
+    allResults.appendChild(frag);
+  }
+
+  function buildCopyText(s) {
+    return [
+      "Travel Distance Meter",
+      "",
+      "Primary: " + s.resultLine,
+      "",
+      "Input:  " + s.inputFull + " (" + s.fromLabel + ")",
+      "Target: " + s.targetFull + " (" + s.toLabel + ")",
+      "Exact:  " + s.metersExact,
+      "",
+      "All unit conversions:",
+      s.allLines.join("\n")
+    ].join("\n");
+  }
+
+  function convert() {
+    var raw = parseFloat(distEl.value);
+    var fromId = fromEl.value;
+    var toId = toEl.value;
+    var meters, allLines, snap;
+
+    if (!isFinite(raw) || raw < 0 || !M_PER[fromId] || !M_PER[toId]) {
+      clearDisplay();
+      return;
+    }
+
+    meters = toMeters(raw, fromId);
+    if (!isFinite(meters) || meters < 0) {
+      clearDisplay();
+      return;
+    }
+
+    allLines = [];
+    renderAllRows(meters, fromId, toId, allLines);
+
+    snap = {
+      resultLine: valueWithUnit(fromId, raw) + " = " + valueWithUnit(toId, fromMeters(meters, toId)),
+      inputFull: valueWithUnit(fromId, raw),
+      targetFull: valueWithUnit(toId, fromMeters(meters, toId)),
+      fromLabel: fromEl.options[fromEl.selectedIndex].textContent,
+      toLabel: toEl.options[toEl.selectedIndex].textContent,
+      metersExact: meters.toFixed(6) + " m",
+      allLines: allLines.map(function (l) { return "  " + l; })
+    };
+
+    resPrimary.textContent = snap.resultLine;
+    resSub.textContent = valueWithUnit("m", meters) + " exact (" + meters.toFixed(6) + " meters)";
+    snap.copyText = buildCopyText(snap);
+    lastSnapshot = snap;
+  }
+
+  function scheduleConvert() {
+    if (rafId !== null) return;
+    rafId = requestAnimationFrame(function () {
+      rafId = null;
+      convert();
+    });
+  }
+
+  function cancelScheduled() {
+    if (rafId !== null) {
+      cancelAnimationFrame(rafId);
+      rafId = null;
+    }
+  }
+
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add("show");
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toast.classList.remove("show"); }, 1600);
+  }
+
+  function fallbackCopy(text) {
+    var ta = document.createElement("textarea");
+    var ok = false;
+    ta.value = text;
+    ta.setAttribute("readonly", "");
+    ta.style.cssText = "position:fixed;top:0;left:0;width:1px;height:1px;opacity:0";
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    ta.setSelectionRange(0, text.length);
+    try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+    document.body.removeChild(ta);
+    showToast(ok ? "Copied all results" : "Copy failed — please copy manually");
+  }
+
+  function copyResults() {
+    var text;
+    cancelScheduled();
+    convert();
+    if (!lastSnapshot || !lastSnapshot.copyText) {
+      showToast("Nothing to copy — enter a valid distance");
+      return;
+    }
+    text = lastSnapshot.copyText;
+    if (window.isSecureContext && navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(
+        function () { showToast("Copied all results"); },
+        function () { fallbackCopy(text); }
+      );
+    } else {
+      fallbackCopy(text);
+    }
+  }
+
+  function clearAll() {
+    cancelScheduled();
+    applyDefaults();
+    convert();
+    distEl.focus({ preventScroll: true });
+  }
+
+  function init() {
+    optionsHtml = buildOptionsHtml();
+    populateSelects();
+    applyDefaults();
+    convert();
+  }
+
+  $("calcBtn").addEventListener("click", function () {
+    cancelScheduled();
+    convert();
+  });
+  $("copyBtn").addEventListener("click", copyResults);
+  $("clearBtn").addEventListener("click", clearAll);
+
+  distEl.addEventListener("input", scheduleConvert);
+  distEl.addEventListener("change", scheduleConvert);
+  fromEl.addEventListener("change", scheduleConvert);
+  toEl.addEventListener("change", scheduleConvert);
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
+</script>
+</body>
+</html>
